@@ -1,0 +1,664 @@
+import {
+  CodeSurfer,
+  CodeSurferColumns,
+  Step,
+} from "code-surfer";
+import { Appear, Notes, themes as mdxThemes } from 'mdx-deck'
+import { github, vsDark } from "@code-surfer/themes";
+import customTheme from './theme';
+
+export const themes = [mdxThemes.condensed, customTheme];
+
+## React Apollo Hooks
+### & Testing w GraphQL Automocking
+###### Randall Jones | Senior Frontend Engineer @ H-E-B Digital
+
+---
+
+### Topics
+
+<ul>
+  <Appear>
+    <li>Apollo Hooks Overview</li>
+    <li>Paginated Query Example</li>
+    <li>Testing with testing-library and MockerProvider</li>
+    <li>Automocking schema for easier testing</li>
+  </Appear>
+</ul>
+
+---
+
+## GraphQL
+
+> GraphQL is a query language for APIs and a runtime for fulfilling those queries with your existing data. 
+> GraphQL provides a complete and understandable description of the data in your API, gives clients the power to ask for exactly what they need and nothing more, 
+> makes it easier to evolve APIs over time, and enables powerful developer tools.
+
+https://graphql.org/
+
+<Notes>
+  Most of us are probably aware by now but grapqhl has become the new 
+  standard for building web APIs thanks to the huge performance impact 
+  on the frontend code and the developers themselves. 
+</Notes>
+
+---
+
+## Why Apollo Client?
+
+<ul>
+  <Appear>
+    <li>Declarative data fetching</li>
+    <li>Zero-config caching</li>
+    <li>Combine local & remote data @client</li>
+    <li>Vibrant ecosystem</li>
+    <li><a href="https://www.apollographql.com/docs/react/why-apollo/" target="_blank">Learn More</a></li>
+  </Appear>
+</ul>
+
+
+<Notes>
+  Compared to relay or a more vanilla grapql client apollo wins me over in these regards.
+  Apollo shines is in its result caching.
+  Whenever Apollo Client fetches query results from your server, 
+  it automatically caches those results locally. 
+  This makes subsequent executions of the same query extremely fast.
+  local data lets us maybe remove redux or mock an api in development and remove @client when its complete
+</Notes>
+
+---
+ 
+## Apollo Client APIs
+
+<Notes>
+  hocs were nice and composable but the community is moving away from them. 
+  Container components were nice but became tough to compose when needing more funcionality.
+  Hooks!
+</Notes>
+
+---
+
+<CodeSurfer theme={vsDark}>
+
+```js title="@apollo/react-hoc"
+import { graphql } from '@apollo/react-hoc';
+
+function TodoApp({ data: { todos } }) {
+  return (
+    <ul>
+      {todos.map(({ id, text }) => (
+        <li key={id}>{text}</li>
+      ))}
+    </ul>
+  );
+}
+
+export default graphql(gql`
+  query TodoAppQuery {
+    todos {
+      id
+      text
+    }
+  }
+`)(TodoApp);
+
+```
+
+```js title="@apollo/react-components"
+
+<Query query={GET_TODOS}>
+    {({ loading, error, data: { todos } }) => {
+      return (
+        <ul>
+          {todos.map(({ id, text }) => (
+            <li key={id}>{text}</li>
+          ))}
+        </ul>
+      );
+    }}
+</Query>
+
+```
+
+```js title="@apollo/react-hooks"
+
+const { loading, error, data } = useQuery(GET_TODOS);
+
+```
+
+</CodeSurfer>
+
+---
+
+## apollo-client v3
+
+<ul>
+  <Appear>
+    <li>Improved garbage collection and cache evicting</li>
+    <li>Streamlined cache configurtion</li>
+    <li>Cache perfomance improvements</li>
+    <li><a href="https://blog.apollographql.com/previewing-the-apollo-client-3-cache-565fadd6a01e" target="_blank">Learn More</a></li>
+  </Appear>
+</ul>
+
+<Notes>
+  Outside of the promised performance improvements which i never thought was an issue we get a
+  much asked for feature in cache evicting. When deleting an enitity that is used in multiple queries it became
+  cumbersome to react the deletion to all the queries and cache.evict seems to solve this problem.
+</Notes>
+
+---
+
+<CodeSurfer theme={vsDark}>
+
+```js title="apollo-client v2 imports"
+  import { ApolloClient } from 'apollo-client';
+  import { HttpLink } from 'apollo-link-http';
+  import { InMemoryCache } from 'apollo-cache-inmemory';
+  import { ApolloProvider, useQuery, useMutation, useApolloClient } from '@apollo/react-hooks';
+  import gql from 'graphql-tag';
+```
+```js title="apollo-client v3.0 imports"
+import { 
+  ApolloClient,
+  HttpLink,
+  InMemoryCache,
+  ApolloProvider,
+  useQuery, 
+  useMutation,
+  useApolloClient, 
+  gql
+} from '@apollo/client';
+
+```
+
+```js
+  yarn add @apollo/client@beta
+```
+
+</CodeSurfer>
+
+<Notes>
+  v3 is pretty backqards compatible, the only changes you will have to make is 
+  where you import apollo components and configuration from one @apollo/client package
+  get started today with npm
+</Notes>
+
+---
+
+## Configure Apollo Client and Provider
+
+---
+
+<CodeSurfer theme={vsDark}>
+
+```js file=../react-apollo-demo/src/apollo-client.js
+```
+
+```js 2,5,10 file=../react-apollo-demo/src/App.js
+```
+
+</CodeSurfer>
+
+<Notes>For those fo us who have not setup an react apollo app, here is the gist!</Notes>
+
+---
+
+## Query Hooks
+
+[Docs](https://www.apollographql.com/docs/react/data/queries/)
+
+---
+
+<CodeSurfer theme={vsDark}>
+
+```js title="useQuery" subtitle="Simple Query"
+const GET_DOGS = gql`
+  query Dog($breed: String) {
+    dog(breed: $breed) {
+      id
+      displayImage
+    }
+  }
+`;
+
+const { loading, error, data } = useQuery(GET_DOGS);
+```
+
+```js title="useQuery" subtitle="Query with variables"
+const { loading, error, data } = useQuery(GET_DOGS, { variables: { breed: 'boxer' }});
+```
+
+```js title="useLazyQuery"
+const [getDogs, { loading, data }] = useLazyQuery(GET_DOGS);
+```
+
+```js title="useLazyQuery"
+const [getDogs, { loading, data }] = useLazyQuery(GET_DOGS);
+
+const handleSearchSubmit = (e) => getDog({ variables: { breed: e.target.value } })
+```
+
+</CodeSurfer>
+
+<Notes>
+  useQuery evaluates every render and will fetch new query when props change.
+  We dont always want to run query on render so apollo gives a way to run on demand with useLazyQuery
+</Notes>
+
+---
+
+<CodeSurfer theme={vsDark}>
+
+```js title="Query Cache Handling" subtitle="refetch"
+const { loading, error, data, refetch } = useQuery(GET_MESSAGES, { variables: { first: 10 }});
+```
+```js title="Query Cache Handling" subtitle="refetch"
+const { loading, error, data, refetch } = useQuery(GET_MESSAGES, { variables: { first: 10 }});
+
+const onRefresh = () => refetch({ first: 20 });
+```
+
+```js title="Query Cache Handling" subtitle="polling" 
+const { loading, error, data } = useQuery(
+  GET_MESSAGES, 
+  { variables: { first: 10  }, pollInterval: 500 }
+);
+```
+ 
+</CodeSurfer>
+
+<Notes>
+  Whenever Apollo Client fetches query results from your server, 
+  it automatically caches those results locally. This makes subsequent 
+  executions of the same query extremely fast.
+  A lot of the time we want to handle updating cache explicitly or poll for the real time effect.
+</Notes>
+
+---
+
+## Mutation Hooks
+
+[Docs](https://www.apollographql.com/docs/react/data/mutations)
+
+---
+
+<CodeSurfer theme={vsDark}>
+
+```js
+const UPDATE_TODO = gql`
+  mutation UpdateTodo($id: String! $type: String!) {
+    updateTodo(id: $id, type: $type) {
+      id
+      type
+    }
+  }
+`;
+```
+
+```js
+  const [updateTodo] = useMutation(UPDATE_TODO);
+  ...
+  addTodo({ variables: { id: 1, type: 'Profit from apollo' } });
+
+```
+
+```js
+  const [addTodo] = useMutation(
+    ADD_TODO,
+    {
+      update(cache, { data: { addTodo } }) {
+        const { todos } = cache.readQuery({ query: GET_TODOS });
+        cache.writeQuery({
+          query: GET_TODOS,
+          data: { todos: todos.concat([addTodo]) },
+        });
+      }
+    }
+  );
+```
+
+</CodeSurfer>
+
+<Notes>
+  We wont go in depth on mutations for the sake of time but they are just as easy!
+  Mutations to an entity already in the cache will automatically update all queries if the mutation returns common fragments.
+  apollo proivded update callback with client access to maniplute the cache as you please for add, delete, or complex cache updates.
+</Notes>
+
+---
+
+## apollo client hook
+useApolloClient
+
+* query
+* readQuery
+* readFragment
+* writeQuery
+* writeFragment
+
+[Docs](https://www.apollographql.com/docs/react/api/react-hooks/#useapolloclient)
+[Interacting with Cache](https://www.apollographql.com/docs/react/caching/cache-interaction)
+
+<Notes>
+  Helpful for working with apollo cache in side effects such as complex cache updates after a mutation.
+</Notes>
+
+---
+
+<CodeSurfer theme={vsDark}>
+
+```js
+await client.query({
+  query: ARTWORKS_FILTER,
+  variables: queryVariables,
+});
+```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer theme={vsDark}>
+
+```js
+const data = client.readQuery({ query });
+
+const myNewTodo = {
+  id: '6',
+  text: 'Start using Apollo Client.',
+  completed: false,
+  __typename: 'Todo',
+};
+
+client.writeQuery({
+  query,
+  data: {
+    todos: [...data.todos, myNewTodo],
+  },
+});
+```
+
+</CodeSurfer>
+
+---
+
+# Subscription Hooks
+
+useSubscription
+
+[Docs](https://www.apollographql.com/docs/react/data/subscriptions)
+
+---
+
+<CodeSurfer theme={vsDark}>
+
+```js
+const COMMENTS_SUBSCRIPTION = gql`
+  subscription onCommentAdded($repoFullName: String!) {
+    commentAdded(repoFullName: $repoFullName) {
+      id
+      content
+    }
+  }
+`;
+
+function DontReadTheComments({ repoFullName }) {
+  const { data: { commentAdded }, loading } = useSubscription(
+    COMMENTS_SUBSCRIPTION,
+    { variables: { repoFullName } }
+  );
+  return <h4>New comment: {!loading && commentAdded.content}</h4>;
+}
+```
+
+</CodeSurfer>
+
+---
+
+# Artsy Search Demo 
+# Code Walkthrough
+
+---
+
+<CodeSurfer theme={vsDark}>
+
+```js file=../react-apollo-demo/src/components/artworks/ArtworksList/ArtworksList.js
+```
+
+```js 10:21 file=../react-apollo-demo/src/components/artworks/ArtworksList/ArtworksList.js
+```
+
+```js file=./examples/useArtworksList_v1.js
+```
+
+```js 11:13 file=./examples/useArtworksList_v1.js
+```
+
+```js file=../react-apollo-demo/src/components/artworks/ArtworksList/queries.js
+```
+
+```js 8:10 file=./examples/useArtworksList_v1.js
+```
+
+```js 14:17 file=./examples/useArtworksList_v1.js
+```
+
+```js 18:30 file=./examples/useArtworksList_v1.js
+```
+
+```js file=../react-apollo-demo/src/components/artworks/ArtworksList/useArtworksList.js
+```
+
+```js 33:48 file=../react-apollo-demo/src/components/artworks/ArtworksList/useArtworksList.js
+```
+
+```js 33,48 file=../react-apollo-demo/src/components/artworks/ArtworksList/useArtworksList.js
+```
+
+```js 35:39 file=../react-apollo-demo/src/components/artworks/ArtworksList/useArtworksList.js
+```
+
+```js 41:44 file=../react-apollo-demo/src/components/artworks/ArtworksList/useArtworksList.js
+```
+
+</CodeSurfer>
+
+<Notes>
+  1. Initial
+  2. use customHook
+  3. customHook src
+  4. useQuery
+  5. graphql query
+  6. state handlers
+  7. data deriviations
+  8. handlers
+  9. prefetch next page
+  10. prefetch next page variables
+  11. client quert prefetch
+</Notes>
+
+---
+
+# Artsy Search Demo
+
+---
+
+## Testing React Apollo Components
+
+<ul>
+  <Appear>
+    <li>jest</li>
+    <li>testing-library</li>
+    <li>@apollo/react-testing MockedProvider</li>
+    <li>graphql-tools auto mocking</li>
+  </Appear>
+</ul>
+
+---
+
+## Apollo Mocked Provider
+
+---
+
+<CodeSurfer theme={vsDark}>
+
+```js 1 file=./examples/mockedProvider.js
+```
+
+```js 53:63 file=./examples/mockedProvider.js
+```
+
+```js 8:15 file=./examples/mockedProvider.js
+```
+
+```js 16:49 file=./examples/mockedProvider.js
+```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer theme={vsDark}>
+
+```js 45:67 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+</CodeSurfer>
+
+___
+
+# Auto mocking
+
+* inspiration article https://www.telerik.com/blogs/mocking-and-testing-graphql-in-react
+* apollo-mocked-provider https://github.com/benawad/apollo-mocked-provider
+
+___
+
+<CodeSurfer theme={vsDark}>
+
+```js
+import { ApolloProvider } from '@apollo/client';
+import { typeDefs } from 'test/mocks/typeDefs';
+import { createApolloMockedProvider } from 'test/utils/createApolloMockedProvider';
+
+export const ApolloMockedProvider = createApolloMockedProvider(
+  typeDefs,
+  {
+    provider: ApolloProvider,
+  }
+);
+```
+
+``` diff 3,5
+```
+
+``` diff 2,6
+```
+
+``` diff 1,8
+```
+
+```js title="createApolloMockedProvider" file=../react-apollo-demo/src/test/utils/createApolloMockedProvider.js
+```
+
+```js 2, 13 title="createApolloMockedProvider" file=../react-apollo-demo/src/test/utils/createApolloMockedProvider.js
+```
+
+```js 17:18 title="createApolloMockedProvider" file=../react-apollo-demo/src/test/utils/createApolloMockedProvider.js
+```
+
+```js 21:28 title="createApolloMockedProvider" file=../react-apollo-demo/src/test/utils/createApolloMockedProvider.js
+```
+
+```js title="globalResolvers" file=../react-apollo-demo/src/test/mocks/globalResolvers.js
+```
+
+```js 30:37 title="createApolloMockedProvider" file=../react-apollo-demo/src/test/utils/createApolloMockedProvider.js
+```
+
+```js 38 title="createApolloMockedProvider" file=../react-apollo-demo/src/test/utils/createApolloMockedProvider.js
+```
+
+
+
+</CodeSurfer>
+
+<Notes>
+  typeDefs can be provided by a script that intropects your schema. example in the repo downloadTypeDefs
+</Notes>
+
+___
+
+<CodeSurfer theme={vsDark}>
+
+```js 150:181 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 151:155 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 7:29 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 157 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 159:160 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 162 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 164:166 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 168:170 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 171 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 172:174 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 176:178 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 178:179 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 180 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer theme={vsDark}>
+
+```js 69:70 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 76:82 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 76:82 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 84:85 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 92:95 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+</CodeSurfer>
+
+---
+
+## Thank you
+
+* Slides built with [MDX Deck](https://github.com/jxnblk/mdx-deck) & [Code Surfer](https://codesurfer.pomb.us)
+
+* [Demo Repo](https://github.com/rammano3/react-apollo-demo)
+* [Slides Repo](https://github.com/rammano3/react-apollo-demo-slides)
