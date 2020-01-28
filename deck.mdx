@@ -4,10 +4,36 @@ import {
   Step,
 } from "code-surfer";
 import { Appear, Notes, themes as mdxThemes } from 'mdx-deck'
-import { github, vsDark } from "@code-surfer/themes";
-import customTheme from './theme';
+import { vsDark } from "@code-surfer/themes";
 
-export const themes = [mdxThemes.condensed, customTheme];
+export const themes = [
+  mdxThemes.condensed, 
+  vsDark, 
+  { 
+    colors: {
+      text: '#FFF',
+      background: "#000"
+    },
+    styles: { 
+      CodeSurfer: { 
+        title: {
+          backgroundColor: "#000",
+          color: "#FFF"
+        },
+        code: {
+          backgroundColor: "#000"
+        },
+        pre: {
+          backgroundColor: "#000"
+        }
+      },
+      blockquote: {
+        paddingLeft: "2rem",
+        borderLeft: `5px solid #fff`,
+      },
+    } 
+  }
+]
 
 ## React Apollo Hooks
 ### & Testing w GraphQL Automocking
@@ -21,7 +47,7 @@ export const themes = [mdxThemes.condensed, customTheme];
   <Appear>
     <li>Apollo Hooks Overview</li>
     <li>Paginated Query Example</li>
-    <li>Testing with testing-library and MockerProvider</li>
+    <li>Testing with testing-library and MockedProvider</li>
     <li>Automocking schema for easier testing</li>
   </Appear>
 </ul>
@@ -52,7 +78,7 @@ https://graphql.org/
     <li>Zero-config caching</li>
     <li>Combine local & remote data @client</li>
     <li>Vibrant ecosystem</li>
-    <li><a href="https://www.apollographql.com/docs/react/why-apollo/" target="_blank">Learn More</a></li>
+    <li><a href="https://www.apollographql.com/docs/react/why-apollo/" target="_blank">https://www.apollographql.com/docs/react/why-apollo/"</a></li>
   </Appear>
 </ul>
 
@@ -78,7 +104,7 @@ https://graphql.org/
 
 ---
 
-<CodeSurfer theme={vsDark}>
+<CodeSurfer>
 
 ```js title="@apollo/react-hoc"
 import { graphql } from '@apollo/react-hoc';
@@ -135,9 +161,10 @@ const { loading, error, data } = useQuery(GET_TODOS);
 <ul>
   <Appear>
     <li>Improved garbage collection and cache evicting</li>
-    <li>Streamlined cache configurtion</li>
+    <li>Streamlined cache configuration</li>
     <li>Cache perfomance improvements</li>
-    <li><a href="https://blog.apollographql.com/previewing-the-apollo-client-3-cache-565fadd6a01e" target="_blank">Learn More</a></li>
+    <li>Smaller bundle</li>
+    <li><a href="https://blog.apollographql.com/previewing-the-apollo-client-3-cache-565fadd6a01e" target="_blank">https://blog.apollographql.com/previewing-the-apollo-client-3-cache-565fadd6a01e</a></li>
   </Appear>
 </ul>
 
@@ -149,7 +176,7 @@ const { loading, error, data } = useQuery(GET_TODOS);
 
 ---
 
-<CodeSurfer theme={vsDark}>
+<CodeSurfer>
 
 ```js title="apollo-client v2 imports"
   import { ApolloClient } from 'apollo-client';
@@ -158,7 +185,7 @@ const { loading, error, data } = useQuery(GET_TODOS);
   import { ApolloProvider, useQuery, useMutation, useApolloClient } from '@apollo/react-hooks';
   import gql from 'graphql-tag';
 ```
-```js title="apollo-client v3.0 imports"
+```js title="apollo-client v3 imports"
 import { 
   ApolloClient,
   HttpLink,
@@ -172,10 +199,6 @@ import {
 
 ```
 
-```js
-  yarn add @apollo/client@beta
-```
-
 </CodeSurfer>
 
 <Notes>
@@ -186,11 +209,15 @@ import {
 
 ---
 
+yarn add @apollo/client@beta
+
+---
+
 ## Configure Apollo Client and Provider
 
 ---
 
-<CodeSurfer theme={vsDark}>
+<CodeSurfer>
 
 ```js file=../react-apollo-demo/src/apollo-client.js
 ```
@@ -206,11 +233,11 @@ import {
 
 ## Query Hooks
 
-[Docs](https://www.apollographql.com/docs/react/data/queries/)
+https://www.apollographql.com/docs/react/data/queries/
 
 ---
 
-<CodeSurfer theme={vsDark}>
+<CodeSurfer>
 
 ```js title="useQuery" subtitle="Simple Query"
 const GET_DOGS = gql`
@@ -236,7 +263,7 @@ const [getDogs, { loading, data }] = useLazyQuery(GET_DOGS);
 ```js title="useLazyQuery"
 const [getDogs, { loading, data }] = useLazyQuery(GET_DOGS);
 
-const handleSearchSubmit = (e) => getDog({ variables: { breed: e.target.value } })
+const handleSearchSubmit = (e) => getDogs({ variables: { breed: e.target.value } })
 ```
 
 </CodeSurfer>
@@ -248,7 +275,7 @@ const handleSearchSubmit = (e) => getDog({ variables: { breed: e.target.value } 
 
 ---
 
-<CodeSurfer theme={vsDark}>
+<CodeSurfer>
 
 ```js title="Query Cache Handling" subtitle="refetch"
 const { loading, error, data, refetch } = useQuery(GET_MESSAGES, { variables: { first: 10 }});
@@ -283,9 +310,9 @@ const { loading, error, data } = useQuery(
 
 ---
 
-<CodeSurfer theme={vsDark}>
+<CodeSurfer>
 
-```js
+```js title="useMutation"
 const UPDATE_TODO = gql`
   mutation UpdateTodo($id: String! $type: String!) {
     updateTodo(id: $id, type: $type) {
@@ -296,14 +323,14 @@ const UPDATE_TODO = gql`
 `;
 ```
 
-```js
+```js title="useMutation"
   const [updateTodo] = useMutation(UPDATE_TODO);
   ...
-  addTodo({ variables: { id: 1, type: 'Profit from apollo' } });
+  updateTodo({ variables: { id: 1, type: 'Profit from apollo' } });
 
 ```
 
-```js
+```js title="useMutation"
   const [addTodo] = useMutation(
     ADD_TODO,
     {
@@ -337,8 +364,8 @@ useApolloClient
 * writeQuery
 * writeFragment
 
-[Docs](https://www.apollographql.com/docs/react/api/react-hooks/#useapolloclient)
-[Interacting with Cache](https://www.apollographql.com/docs/react/caching/cache-interaction)
+https://www.apollographql.com/docs/react/api/react-hooks/#useapolloclient
+https://www.apollographql.com/docs/react/caching/cache-interaction
 
 <Notes>
   Helpful for working with apollo cache in side effects such as complex cache updates after a mutation.
@@ -346,22 +373,17 @@ useApolloClient
 
 ---
 
-<CodeSurfer theme={vsDark}>
+<CodeSurfer>
 
-```js
+```js title="useApolloClient"
+const client = useApolloClient();
 await client.query({
   query: ARTWORKS_FILTER,
   variables: queryVariables,
 });
 ```
 
-</CodeSurfer>
-
----
-
-<CodeSurfer theme={vsDark}>
-
-```js
+```js title="useApolloClient"
 const data = client.readQuery({ query });
 
 const myNewTodo = {
@@ -387,13 +409,13 @@ client.writeQuery({
 
 useSubscription
 
-[Docs](https://www.apollographql.com/docs/react/data/subscriptions)
+https://www.apollographql.com/docs/react/data/subscriptions
 
 ---
 
-<CodeSurfer theme={vsDark}>
+<CodeSurfer>
 
-```js
+```js title="useSubscription"
 const COMMENTS_SUBSCRIPTION = gql`
   subscription onCommentAdded($repoFullName: String!) {
     commentAdded(repoFullName: $repoFullName) {
@@ -421,7 +443,7 @@ function DontReadTheComments({ repoFullName }) {
 
 ---
 
-<CodeSurfer theme={vsDark}>
+<CodeSurfer>
 
 ```js file=../react-apollo-demo/src/components/artworks/ArtworksList/ArtworksList.js
 ```
@@ -480,10 +502,6 @@ function DontReadTheComments({ repoFullName }) {
 
 ---
 
-# Artsy Search Demo
-
----
-
 ## Testing React Apollo Components
 
 <ul>
@@ -501,7 +519,7 @@ function DontReadTheComments({ repoFullName }) {
 
 ---
 
-<CodeSurfer theme={vsDark}>
+<CodeSurfer>
 
 ```js 1 file=./examples/mockedProvider.js
 ```
@@ -519,7 +537,7 @@ function DontReadTheComments({ repoFullName }) {
 
 ---
 
-<CodeSurfer theme={vsDark}>
+<CodeSurfer>
 
 ```js 45:67 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
 ```
@@ -530,12 +548,12 @@ ___
 
 # Auto mocking
 
-* inspiration article https://www.telerik.com/blogs/mocking-and-testing-graphql-in-react
+* https://www.apollographql.com/docs/graphql-tools/mocking/
 * apollo-mocked-provider https://github.com/benawad/apollo-mocked-provider
 
 ___
 
-<CodeSurfer theme={vsDark}>
+<CodeSurfer>
 
 ```js
 import { ApolloProvider } from '@apollo/client';
@@ -586,16 +604,103 @@ export const ApolloMockedProvider = createApolloMockedProvider(
 
 <Notes>
   typeDefs can be provided by a script that intropects your schema. example in the repo downloadTypeDefs
+  auto mocking defaults to 'Hello World', 0, and a list of two
 </Notes>
 
-___
+---
 
-<CodeSurfer theme={vsDark}>
+<CodeSurfer>
 
 ```js 150:181 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
 ```
 
 ```js 151:155 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 7:29 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+
+```json
+{
+   "counts":{
+      "total":41702
+   },
+   "filtered_artworks":{
+      "pageCursors":{
+         "previous":{
+            "page":57
+         }
+      },
+      "edges":[
+         {
+            "node":{
+               "id":"36b52953-14b9-4cf5-92fc-987568822a7c",
+               "href":"Hello World",
+               "title":"Hello World",
+               "artist_names":"Hello World",
+               "image":{
+                  "url":"Hello World",
+                  "aspect_ratio":-68.64164647536768
+               }
+            }
+         },
+         {
+            "node":{
+               "id":"90871183-ce0f-43bd-b10c-96a22b44f32c",
+               "href":"Hello World",
+               "title":"Hello World",
+               "artist_names":"Hello World",
+               "image":{
+                  "url":"Hello World",
+                  "aspect_ratio":24.094378813196073
+               }
+            }
+         }
+      ]
+   }
+}
+```
+
+```json
+{
+   "counts":{
+      "total":41702
+   },
+   "filtered_artworks":{
+      "pageCursors":{
+         "previous":{
+            "page":0
+         }
+      },
+      "edges":[
+         {
+            "node":{
+               "id":"artwork-id-1",
+               "href":"Hello World",
+               "title":"Art 1",
+               "artist_names":"Hello World",
+               "image":{
+                  "url":"Hello World",
+                  "aspect_ratio":-68.64164647536768
+               }
+            }
+         },
+         {
+            "node":{
+               "id":"artwork-id-2",
+               "href":"Hello World",
+               "title":"Art 2",
+               "artist_names":"Hello World",
+               "image":{
+                  "url":"Hello World",
+                  "aspect_ratio":24.094378813196073
+               }
+            }
+         }
+      ]
+   }
+}
 ```
 
 ```js 7:29 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
@@ -615,27 +720,18 @@ ___
 
 ```js 168:170 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
 ```
-
-```js 171 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
-```
-
-```js 172:174 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
-```
-
-```js 176:178 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+ 
+```js 175:177 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
 ```
 
 ```js 178:179 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
-```
-
-```js 180 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
 ```
 
 </CodeSurfer>
 
 ---
 
-<CodeSurfer theme={vsDark}>
+<CodeSurfer>
 
 ```js 69:70 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
 ```
@@ -649,7 +745,43 @@ ___
 ```js 84:85 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
 ```
 
-```js 92:95 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```js 97 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 101:102 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```js 106:148 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 107:109 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 116 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 119:126 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 134 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 136:137 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 141 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 144 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
+```
+
+```js 147 file=../react-apollo-demo/src/components/artworks/ArtworksList/__tests__/ArtworksList.test.js
 ```
 
 </CodeSurfer>
@@ -658,7 +790,10 @@ ___
 
 ## Thank you
 
-* Slides built with [MDX Deck](https://github.com/jxnblk/mdx-deck) & [Code Surfer](https://codesurfer.pomb.us)
+###### jones.randall@heb.com
 
-* [Demo Repo](https://github.com/rammano3/react-apollo-demo)
-* [Slides Repo](https://github.com/rammano3/react-apollo-demo-slides)
+https://github.com/rammano3
+
+* Slides built with [MDX Deck](https://github.com/jxnblk/mdx-deck) & [Code Surfer](https://codesurfer.pomb.us)
+* Demo https://github.com/rammano3/react-apollo-demo
+* Slides https://github.com/rammano3/react-apollo-demo-slides
